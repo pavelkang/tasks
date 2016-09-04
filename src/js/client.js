@@ -4,7 +4,6 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import darkBaseTheme from 'material-ui/styles/baseThemes/darkBaseTheme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import Layout from "./components/Layout";
-import TimeSelector from "./components/TimeSelector";
 import injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();
 

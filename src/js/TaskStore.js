@@ -5,31 +5,41 @@ class TaskStore extends EventEmitter {
   constructor() {
     super();
     this.tasks = [
-      {
-        id: 1,
-        name: "Work on this app",
-        complete: false
-      }
     ]
+    this.currentTask = null;
   }
   getAll() {
     return this.tasks;
   }
-  createTask(_name) {
+  _createTask(_name) {
     const _id = Date.now();
     this.tasks.push({
       id: _id,
       name: _name,
-      complete: false,
+      tags: ['tag', 'not', 'implemented'],
+      assignee: 'Kai Kang',
+      desc: 'Dummy description',
+      priority: 1,
+      comments: [],
     });
     this.emit("change");
   }
   handleActions(action) {
     switch(action.type) {
-      case "CREATE_TASK": {
-        this.createTask(action.name);
-      }
+      case "CREATE_TASK":
+        this._createTask(action.name);
+        break;
+      case "SET_TASK":
+        this._selectTask(action.task);
+        break;
     }
+  }
+  _selectTask(task) {
+    this.currentTask = task;
+    this.emit("change");
+  }
+  getCurrentTask() {
+    return this.currentTask;
   }
 }
 

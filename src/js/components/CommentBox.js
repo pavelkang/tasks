@@ -11,9 +11,7 @@ export default class CommentBox extends React.Component {
     return (
       <div>
         <TextField
-        hintText='Comment...'
-        multiLine={true}
-        rows={2}
+        hintText='Comment this task ...'
         />
         <FlatButton label="Comment" primary={true}/>
       </div>

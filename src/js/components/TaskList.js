@@ -3,6 +3,8 @@ import {List, ListItem} from 'material-ui/List';
 import Subheader from 'material-ui/Subheader';
 import Checkbox from 'material-ui/Checkbox';
 import * as TaskAction from '../actions/TaskAction';
+import FlatButton from 'material-ui/FlatButton';
+import ActionDeleteForever from 'material-ui/svg-icons/action/delete-forever';
 
 const style = {
   textAlign: 'none',

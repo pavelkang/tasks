@@ -35,8 +35,9 @@ const inputstyle = {
 }
 
 const viewerstyle = {
+  marginLeft: 50,
   height: '100vh',
-  float: 'right',
+  float: 'left',
   width: '100%',
   overflowX: 'hidden',
 }
@@ -95,7 +96,7 @@ export default class Layout extends React.Component {
   render() {
     return (
       <div style={containerstyle}>
-        <AppBar title="Tasks" zDepth={0}
+        <AppBar title="^_^" zDepth={0}
           iconElementRight={this.getIcon()}
           style={barstyle}
           />

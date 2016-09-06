@@ -10,6 +10,7 @@ injectTapEventPlugin();
 const muiTheme = getMuiTheme({
   palette: {
     primary1Color: '#3b5998',
+    
   }
 });
 

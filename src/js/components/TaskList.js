@@ -21,11 +21,25 @@ export default class TaskList extends React.Component {
   }
 
   render() {
-    var tasks = this.props.items.map(function(item, i) {
+    var sortedItems = this.props.items;
+    sortedItems.sort(function(taskA, taskB) {
+      if (!taskB.date) {
+        return -1;
+      } else {
+        if (taskA.date) {
+          var a = new Date(taskA.date);
+          var b = new Date(taskB.date);
+          return a - b;
+        } else {
+          return 1;
+        }
+      }
+    })
+    var tasks = sortedItems.map(function(item, i) {
       return <ListItem
       key={item.id}
       primaryText={item.name}
-      secondaryText={item.desc}
+      secondaryText={item.date ? item.date.slice(5,10) : "--"}
       onClick={this.handleClick.bind(this, i, this.props)}
       ></ListItem>
     }.bind(this));

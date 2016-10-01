@@ -10,10 +10,16 @@ import FlatButton from 'material-ui/FlatButton';
 import RaisedButton from 'material-ui/RaisedButton';
 import TaskStore from '../TaskStore';
 import * as TaskAction from "../actions/TaskAction.js";
+import DatePicker from 'material-ui/DatePicker';
+import FloatingActionButton from 'material-ui/FloatingActionButton';
+import ActionDone from 'material-ui/svg-icons/action/done';
+import {Editor, EditorState, ContentState, convertToRaw, convertFromRaw, createWithContent} from 'draft-js';
+import ContentSort from 'material-ui/svg-icons/content/sort';
 
 const _leftpad = 15;
 
 const style = {
+  paddingTop: 10,
 }
 
 const assignstyle = {
@@ -28,8 +34,13 @@ const tasknamestyle = {
 }
 
 const savebuttonstyle = {
-  position: 'absolute',
-  right: '20px',
+  float: 'right',
+  marginTop: 3,
+  marginRight: 10,
+}
+
+const finishbuttonstyle = {
+  backgroundColor: 'red',
 }
 
 const taskheaderstyle = {
@@ -40,16 +51,11 @@ const taskheaderstyle = {
 }
 
 const dividerstyle = {
-  marginTop: 5,
+  marginTop: 0,
+  marginBottom: 10,
 }
 
 const tagviewerstyle = {
-  paddingLeft: _leftpad,
-  marginTop: 10,
-  paddingTop: 10,
-}
-
-const descstyle = {
   paddingLeft: _leftpad,
   marginTop: 10,
   paddingTop: 10,
@@ -59,6 +65,25 @@ const commentboxstyle = {
   paddingLeft: _leftpad,
   marginTop: 10,
   paddingTop: 10,
+}
+
+const datepickerstyle = {
+  color: '#3b5998',
+  paddingLeft: 20,
+  display: 'inline-block',
+}
+
+const primary = {
+  color: '#3b5998',
+}
+
+const editorstyle = {
+  border: '1px solid #ccc',
+  cursor: 'text',
+  minHeight: 180,
+  padding: 10,
+  backgroundColor: '#fff',
+  marginTop: 10,
 }
 
 export default class TaskViewer extends React.Component {
@@ -73,12 +98,23 @@ export default class TaskViewer extends React.Component {
 
   _initState(task) {
     if (!task) {
+      this.state = {editorState: EditorState.createEmpty()};
       return ;
     }
+    if (task.date) {
+      var date = new Date(task.date);
+    } else {
+      var date = null;
+    }
+    if (task.content) {
+      var es = EditorState.createWithContent(convertFromRaw(JSON.parse(task.content)));
+    } else {
+      var es = EditorState.createEmpty();
+    }
     this.state = {
-      descState : true,
-      descValue : task.desc,
       changeNotSaved : false,
+      dateValue: date,
+      editorState: es,
     }
   }
 
@@ -100,27 +136,21 @@ export default class TaskViewer extends React.Component {
     }
   }
 
-  handleDescOnClick(e) {
-    if (this.state.descState) { // if it is a div, change to textarea
+  onEditorChange(newState) {
+    this.setState({editorState: newState});
+    var contentState = newState.getCurrentContent();
+    if (contentState !== this.state.editorState.getCurrentContent()) {
       this.setState({
-        descState: false,
-      });
-    }
+        changeNotSaved: true,
+      })
+    };
   }
 
-  handleDescOnChange(e) {
+  handleDateOnChange(event, date) {
     this.setState({
-      descValue: e.target.value,
-      changeNotSaved: true,
-    });
-  }
-
-  handleDescOnBlur() {
-    if (!this.state.descState) {
-      this.setState({
-        descState: true,
-      });
-    }
+  dateValue: date,
+  changeNotSaved: true,
+});
   }
 
   handleDelete() {
@@ -128,33 +158,30 @@ export default class TaskViewer extends React.Component {
   }
 
   componentWillMount() {
-    TaskStore.on("change", () => {
-      this.setState({
-        descValue: this.props.task.desc,
-      })
-    });
     if (!this.props.task) {
       return;
     }
     this.setState({
       descValue: this.props.task.desc,
+      date: this.props.task.date
     });
   }
 
-  handleDescOnHover(e) {
-    // TODO
-  }
-
   componentWillReceiveProps(nextProps) {
-    console.log(nextProps);
     this._initState(nextProps.task);
   }
 
   handleSaveClicked() {
     TaskAction.modifyTask(
       this.props.task.id, {
-        'desc' : this.state.descValue,
+        'desc' : 'nop',
+        'date' : this.state.dateValue,
+        'content': JSON.stringify(convertToRaw(this.state.editorState.getCurrentContent()))
       });
+  }
+
+  onEditorFocus() {
+    this.refs.editor.focus();
   }
 
   render() {
@@ -166,32 +193,34 @@ export default class TaskViewer extends React.Component {
         <div style={taskheaderstyle}>
 
           <h1 style={tasknamestyle}>{this.getPropertyIfNotNull('name')}</h1>
-          <p style={assignstyle}>{this.getPropertyIfNotNull('assignee')}</p>
-          <FlatButton
+            <DatePicker
+          hintText="Due date"
+          container="inline"
+          autoOk={true}
+          style={datepickerstyle}
+          value={this.state.dateValue}
+          onChange={this.handleDateOnChange.bind(this)}
+        />
+        <RaisedButton
           label="Save"
           secondary={true}
           disabled={!this.state.changeNotSaved}
           onClick={this.handleSaveClicked.bind(this)}
           style={savebuttonstyle}/>
         </div>
-          <Divider style={dividerstyle}/>
-          <TagViewer
-          tags={this.getPropertyIfNotNull('tags')}
-          style={tagviewerstyle}/>
-          <EditableDiv
-          id='desc'
-          data={this.state.descValue}
-          phase={this.state.descState}
-          onClick={this.handleDescOnClick.bind(this)}
-          onBlur={this.handleDescOnBlur.bind(this)}
-          onChange={this.handleDescOnChange.bind(this)}
-          onHover={this.handleDescOnHover.bind(this)}
-          style={descstyle}
-          />
-          <br/>
-          <RaisedButton label="Delete"
-          secondary={true}
-          onClick={this.handleDelete.bind(this)}/>
+
+        <div style={editorstyle} onClick={this.onEditorFocus.bind(this)}>
+            <ContentSort style={primary}/> <span style={primary}>Description</span>
+            <Editor editorState={this.state.editorState} onChange={this.onEditorChange.bind(this)} ref='editor'/>
+        </div>
+
+      <br/>
+      <center>
+        <FloatingActionButton style={finishbuttonstyle}
+          onClick={this.handleDelete.bind(this)}>
+        <ActionDone />
+      </FloatingActionButton>
+</center>
           </div>
     )
   }

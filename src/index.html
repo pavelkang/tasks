@@ -1,36 +1,26 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Tasks</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-  </head>
-
-  <body>
-    <div id="app"></div>
-
-  </body>
-
-  <style media="screen">
-  body {
-    background-color: #eee;
-    font-family: 'Roboto';
-    padding: 0;
-    margin: 0;
-  }
-  </style>
-
-<script src="https://www.gstatic.com/firebasejs/3.3.0/firebase.js"></script>
-<script>
-  // Initialize Firebase
-  var config = {
-    apiKey: "AIzaSyAF0c9N-kStxE8k32J5Sx69Dj95ZGUQOaQ",
-    authDomain: "tasks-91911.firebaseapp.com",
-    databaseURL: "https://tasks-91911.firebaseio.com",
-    storageBucket: "tasks-91911.appspot.com",
-  };
-  firebase.initializeApp(config);
-</script>
-    <script src="client.min.js"></script>
-    <link rel="stylesheet" href="Draft.css">
+    <head>
+        <meta charset="UTF-8"/>
+        <script src="https://www.gstatic.com/firebasejs/3.4.1/firebase.js"></script>
+        <script>
+         // Initialize Firebase
+         var config = {
+             apiKey: "AIzaSyAF0c9N-kStxE8k32J5Sx69Dj95ZGUQOaQ",
+             authDomain: "tasks-91911.firebaseapp.com",
+             databaseURL: "https://tasks-91911.firebaseio.com",
+             storageBucket: "tasks-91911.appspot.com",
+             messagingSenderId: "442793099548"
+         };
+         firebase.initializeApp(config);
+        </script>
+        <script src="https://www.gstatic.com/firebasejs/ui/live/0.4/firebase-ui-auth.js"></script>
+        <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/live/0.4/firebase-ui-auth.css" />
+        <title>Tasks</title>
+    </head>
+    <body>
+        <script src="index.js"></script>
+        <h1>Please sign in</h1>
+        <div id="firebaseui-auth-container"></div>
+    </body>
 </html>

@@ -149,7 +149,7 @@ export default class Layout extends React.Component {
                       open={this.state.openAddTask}
                       message="Created new task"
                       autoHideDuration={4000}
-                      onRequestClose={this.handleAddTaskDelete}
+                      onRequestClose={this.handleAddTaskDelete.bind(this)}
                     />
       </div>
   );

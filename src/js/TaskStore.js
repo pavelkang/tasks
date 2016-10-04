@@ -1,6 +1,17 @@
 import { EventEmitter } from "events";
 import dispatcher from "./Dispatcher.js";
 
+var getUserOrRedirect = function() {
+  var user = firebase.auth().currentUser;
+
+  if (!user) {
+    window.location.href = "/";
+    return ;
+  } else {
+    return user;
+  }
+}
+
 var obj2list = function(o) {
   if (!o) {
     return [];
@@ -33,19 +44,26 @@ var populateTask = function(key, name) {
 class TaskStore extends EventEmitter {
   constructor() {
     super();
-    this.taskRef = firebase.database().ref('/tasks/');
+    window.addEventListener('load', function() {
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          // signed in
+          this.taskRef = firebase.database().ref('users/' + user.uid + '/tasks/');
+          // initialize this.tasks
+          this.taskRef.once('value').then(function(snapshot) {
+            this.tasks = obj2list(snapshot.val());
+            this.emit("change");
+          }.bind(this));
+          // add listeners
+          // if anything changes, reload the entire task list
+          this.taskRef.on('value', function(snapshot) {
+              this.tasks = obj2list(snapshot.val());
+          }.bind(this))
+        }
+      }.bind(this))
+    }.bind(this))
     this.tasks = [];
     this.currentTask = null;
-    // initialize this.tasks
-    this.taskRef.once('value').then(function(snapshot) {
-      this.tasks = obj2list(snapshot.val());
-      this.emit("change");
-    }.bind(this));
-    // add listeners
-    // if anything changes, reload the entire task list
-    this.taskRef.on('value', function(snapshot) {
-        this.tasks = obj2list(snapshot.val());
-    }.bind(this))
   }
   /*
    * This part is for communication with components
@@ -68,7 +86,8 @@ class TaskStore extends EventEmitter {
     var task = populateTask(newTaskKey, _name);
     var updates = {};
     updates['/tasks/' + newTaskKey] = task;
-    var p = firebase.database().ref().update(updates);
+    var user = getUserOrRedirect();
+    var p = firebase.database().ref('users/'+user.uid+'/').update(updates);
     p.then(function() {
       this.taskRef.once('value', function(snapshot) {
         this.tasks = obj2list(snapshot.val());
@@ -77,7 +96,8 @@ class TaskStore extends EventEmitter {
     }.bind(this));
   }
   _modifyTask(id, modify) {
-    var p = firebase.database().ref('tasks/' + id).update({
+    var user = getUserOrRedirect();
+    var p = firebase.database().ref('users/'+user.uid+'/tasks/' + id).update({
       desc: modify.desc,
       date: modify.date,
       content: modify.content,
@@ -91,7 +111,8 @@ class TaskStore extends EventEmitter {
     }.bind(this))
   }
   _deleteTask(id) {
-    var p = firebase.database().ref('tasks/' + id).remove();
+    var user = getUserOrRedirect();
+    var p = firebase.database().ref('users/' + user.uid+'/tasks/' + id).remove();
     p.then(function() {
       this.taskRef.once('value', function(snapshot) {
         this.tasks = obj2list(snapshot.val());
